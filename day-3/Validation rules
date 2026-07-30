@@ -1,0 +1,17 @@
+Rule 1:
+Validate_Student_CGPA:Student__r.Cgpa__c < Company__r.Minimum_Cgpa__c;
+Error Message:Student CGPA is below the company's minimum CGPA requirement.
+
+
+Rule 2:
+Validate_Application_Date:Application_Date__c > Company__r.Closing_Date__c
+Error Message:Application Date cannot be after the company closing date.
+
+Rule 3:
+Mandatory_Fields:
+OR(
+ISBLANK(Student__c),
+ISBLANK(Company__c),
+ISBLANK(TEXT(Status__c))
+)
+Error Message:Please fill all mandatory fields.
