@@ -1,0 +1,176 @@
+## placementHome.html
+
+```html
+<template>
+    <lightning-card title="Placement Management System" icon-name="standard:people">
+
+        <div class="container">
+
+            <h1 class="title">Placement Portal</h1>
+
+            <div class="card">
+                <p><span class="label">Today's Date :</span> {todayDate}</p>
+                <p><span class="label">Welcome :</span> Student</p>
+                <p><span class="label">Number of Companies :</span> {companyCount}</p>
+                <p><span class="label">Number of Jobs :</span> {jobCount}</p>
+                <p><span class="label">Applications Submitted :</span> {applicationCount}</p>
+            </div>
+
+            <h2 class="heading">Student Details</h2>
+
+            <div class="card">
+                <p><span class="label">Student Name :</span> {studentName}</p>
+                <p><span class="label">Roll Number :</span> {rollNumber}</p>
+                <p><span class="label">Department :</span> {department}</p>
+            </div>
+
+            <div class="button-area">
+                <lightning-button
+                    label="Show Welcome Message"
+                    variant="brand"
+                    onclick={showMessage}>
+                </lightning-button>
+
+                <lightning-button
+                    label="Apply"
+                    variant="success"
+                    onclick={applyJob}
+                    class="applyBtn">
+                </lightning-button>
+            </div>
+
+            <template if:true={isVisible}>
+                <div class="message">
+                    Welcome to Salesforce Development
+                </div>
+            </template>
+
+            <div class="status">
+                Status : {status}
+            </div>
+
+        </div>
+
+    </lightning-card>
+</template>
+```
+
+---
+
+## placementHome.js
+
+```javascript
+import { LightningElement } from 'lwc';
+
+export default class PlacementHome extends LightningElement {
+
+    studentName = 'Revanth Sai';
+    rollNumber = '24PA5A5704';
+    department = 'CSBS';
+
+    todayDate = new Date().toLocaleDateString();
+
+    companyCount = 25;
+    jobCount = 63;
+    applicationCount = 5;
+
+    isVisible = false;
+    status = 'Not Applied';
+
+    showMessage() {
+        this.isVisible = true;
+    }
+
+    applyJob() {
+        this.status = 'Applied';
+    }
+}
+```
+
+---
+
+## placementHome.css
+
+```css
+.container{
+    padding:25px;
+    background:#f4f6f9;
+}
+
+.title{
+    text-align:center;
+    font-size:32px;
+    color:#0176d3;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.heading{
+    text-align:center;
+    color:#032d60;
+    margin-top:25px;
+    margin-bottom:15px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 3px 8px rgba(0,0,0,.15);
+}
+
+.card p{
+    font-size:18px;
+    margin:12px 0;
+}
+
+.label{
+    font-weight:bold;
+    color:#0176d3;
+}
+
+.button-area{
+    margin-top:20px;
+}
+
+.applyBtn{
+    margin-left:15px;
+}
+
+.message{
+    margin-top:20px;
+    background:#d8f3dc;
+    color:#1b5e20;
+    padding:15px;
+    border-radius:8px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.status{
+    margin-top:20px;
+    font-size:20px;
+    font-weight:bold;
+    color:#ba0517;
+}
+```
+
+---
+
+## placementHome.js-meta.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+
+    <targets>
+        <target>lightning__HomePage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+</LightningComponentBundle>
+```
