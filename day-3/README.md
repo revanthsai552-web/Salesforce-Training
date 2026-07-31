@@ -1,45 +1,54 @@
-# Salesforce-Training
-1. Which requirements did you solve using Flow?
+# Salesforce Training – Day 3
 
-We used Record-Triggered Flows for automation.
+## 1. Which requirements did you solve using Flow?
 
-Before-Save Flow
-Automatically populate Application Date.
-Prevent duplicate applications using Custom Error.
+We used **Record-Triggered Flows** to automate business processes.
 
-After-Save Flow
-Send an email notification to the Placement Officer when an application is created.
-Automatically create an Offer Letter record when the application's Status becomes Accepted.
+### Before-Save Flow
+- Automatically populate the **Application Date**.
+- Prevent duplicate applications using a **Custom Error**.
 
-2. Which requirements required Validation Rules?
+### After-Save Flow
+- Send an email notification to the **Placement Officer** when a new application is created.
+- Automatically create an **Offer Letter** record when the application's **Status** changes to **Accepted**.
 
-The following were implemented using Validation Rules:
+---
 
-Student CGPA must be greater than or equal to the Company's minimum CGPA.
-Application Date cannot be after the Company Closing Date.
-Mandatory fields cannot be left blank.
+## 2. Which requirements required Validation Rules?
 
-3. Which requirements still needed Apex?
+The following business rules were implemented using **Validation Rules**:
 
-For your project, none of the listed requirements require Apex.
+- Student **CGPA** must be greater than or equal to the company's **Minimum CGPA**.
+- **Application Date** cannot be later than the company's **Closing Date**.
+- Mandatory fields cannot be left blank before saving a record.
 
-Everything can be implemented using:
+---
 
-Record-Triggered Flows
-Validation Rules
-Email Alerts
-Custom Objects
+## 3. Which requirements still needed Apex?
 
-4. Why did you choose those solutions?
-Record-Triggered Flows
-Best for automating business processes.
-No coding required.
-Easy to maintain and modify.
-Salesforce-recommended solution for automation.
-Validation Rules
-Best for enforcing data quality.
-Prevent invalid records from being saved.
-Provide immediate feedback to users.
-Apex
-Not required because all project requirements can be achieved declaratively.
-Apex should be used only when Flow and Validation Rules cannot satisfy the business requirement or when complex custom logic is needed.
+For this project, **Apex was not required**.
+
+All the required functionality was implemented using Salesforce's declarative features, including:
+
+- Record-Triggered Flows
+- Validation Rules
+- Email Notifications
+- Custom Objects
+
+---
+
+## 4. Why did you choose those solutions?
+
+### Record-Triggered Flows
+- Automate business processes without writing code.
+- Easy to maintain and update.
+- Salesforce-recommended solution for process automation.
+
+### Validation Rules
+- Enforce business rules and maintain data quality.
+- Prevent invalid records from being saved.
+- Provide immediate feedback to users.
+
+### Apex
+- Not required because all project requirements were achieved using declarative Salesforce features.
+- Apex is recommended only when business requirements involve complex logic that cannot be implemented using Flows or Validation Rules.
