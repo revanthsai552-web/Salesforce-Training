@@ -1,0 +1,153 @@
+trigger ApplicationTrigger on Application__c (before insert) {
+
+    // Collect Student and Company IDs
+    Set<Id> studentIds = new Set<Id>();
+    Set<Id> companyIds = new Set<Id>();
+
+    for (Application__c app : Trigger.new) {
+
+        if (app.Student__c != null) {
+            studentIds.add(app.Student__c);
+        }
+
+        if (app.Company__c != null) {
+            companyIds.add(app.Company__c);
+        }
+    }
+
+    // Query Students
+    Map<Id, Student__c> studentMap = new Map<Id, Student__c>(
+        [
+            SELECT Id,
+                   Cgpa__c,
+                   Branch__c,
+                   Active_Backlogs__c,
+                   Gradutaion_year__c
+            FROM Student__c
+            WHERE Id IN :studentIds
+        ]
+    );
+
+    // Query Companies
+    Map<Id, Company__c> companyMap = new Map<Id, Company__c>(
+        [
+            SELECT Id,
+                   Minimum_Cgpa__c,
+                   Eligible_Branch__c,
+                   Maximum_Active_Backlogs__c,
+                   Graduation_Year__c,
+                   Closing_Date__c
+            FROM Company__c
+            WHERE Id IN :companyIds
+        ]
+    );
+
+    // Query existing applications
+    Set<String> existingApplications = new Set<String>();
+
+    for (Application__c app : [
+        SELECT Student__c, Company__c
+        FROM Application__c
+        WHERE Student__c IN :studentIds
+        AND Company__c IN :companyIds
+    ]) {
+
+        existingApplications.add(
+            app.Student__c + '-' + app.Company__c
+        );
+    }
+
+    // Validate applications
+    for (Application__c app : Trigger.new) {
+
+        Student__c student = studentMap.get(app.Student__c);
+        Company__c company = companyMap.get(app.Company__c);
+
+        // Default Status
+        app.Status__c = 'Applied';
+
+
+        // =========================
+        // CGPA Validation
+        // =========================
+
+        if (student != null &&
+            company != null &&
+            student.Cgpa__c < company.Minimum_Cgpa__c) {
+
+            app.addError(
+                'Application rejected: Student CGPA is below the minimum CGPA required by this company.'
+            );
+        }
+
+
+        // =========================
+        // Branch Validation
+        // =========================
+
+        if (student != null &&
+            company != null &&
+            student.Branch__c != company.Eligible_Branch__c) {
+
+            app.addError(
+                'Application rejected: Student branch is not eligible for this company.'
+            );
+        }
+
+
+        // =========================
+        // Active Backlogs Validation
+        // =========================
+
+        if (student != null &&
+            company != null &&
+            student.Active_Backlogs__c > company.Maximum_Active_Backlogs__c) {
+
+            app.addError(
+                'Application rejected: Student has more active backlogs than allowed by this company.'
+            );
+        }
+
+
+        // =========================
+        // Graduation Year Validation
+        // =========================
+
+        if (student != null &&
+            company != null &&
+            student.Gradutaion_year__c != company.Graduation_Year__c) {
+
+            app.addError(
+                'Application rejected: Student graduation year does not match the company requirement.'
+            );
+        }
+
+
+        // =========================
+        // Closing Date Validation
+        // =========================
+
+        if (company != null &&
+            company.Closing_Date__c != null &&
+            Date.today() > company.Closing_Date__c) {
+
+            app.addError(
+                'Applications for this company are closed.'
+            );
+        }
+
+
+        // =========================
+        // Duplicate Application Validation
+        // =========================
+
+        String key = app.Student__c + '-' + app.Company__c;
+
+        if (existingApplications.contains(key)) {
+
+            app.addError(
+                'This student has already applied to this company.'
+            );
+        }
+    }
+}
