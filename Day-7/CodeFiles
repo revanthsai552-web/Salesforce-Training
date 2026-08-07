@@ -1,0 +1,167 @@
+// ============================================================
+// 1. ApplicationTrigger.trigger
+// ============================================================
+
+trigger ApplicationTrigger on Application__c (
+    before insert,
+    before update,
+    after update
+) {
+
+    // Before Insert
+    if (Trigger.isBefore && Trigger.isInsert) {
+
+        ApplicationTriggerHandler.beforeInsert(
+            Trigger.new
+        );
+    }
+
+    // Before Update
+    if (Trigger.isBefore && Trigger.isUpdate) {
+
+        ApplicationTriggerHandler.beforeUpdate(
+            Trigger.new,
+            Trigger.oldMap
+        );
+    }
+
+    // After Update
+    if (Trigger.isAfter && Trigger.isUpdate) {
+
+        ApplicationTriggerHandler.afterUpdate(
+            Trigger.new,
+            Trigger.oldMap
+        );
+    }
+}
+
+
+// ============================================================
+// 2. ApplicationTriggerHandler.cls
+// ============================================================
+
+public class ApplicationTriggerHandler {
+
+    public static void beforeInsert(
+        List<Application__c> applications
+    ) {
+
+        ApplicationService.validateApplications(
+            applications
+        );
+    }
+
+
+    public static void beforeUpdate(
+        List<Application__c> applications,
+        Map<Id, Application__c> oldMap
+    ) {
+
+        // Before update logic can be added here
+    }
+
+
+    public static void afterUpdate(
+        List<Application__c> applications,
+        Map<Id, Application__c> oldMap
+    ) {
+
+        SelectionService.processSelectedApplications(
+            applications,
+            oldMap
+        );
+    }
+}
+
+
+// ============================================================
+// 3. SelectionService.cls
+// ============================================================
+
+public class SelectionService {
+
+    public static void processSelectedApplications(
+        List<Application__c> applications,
+        Map<Id, Application__c> oldMap
+    ) {
+
+        Set<Id> studentIds = new Set<Id>();
+
+        // Collect Student IDs whose status changed
+        for (Application__c app : applications) {
+
+            Application__c oldApp = oldMap.get(app.Id);
+
+            if (oldApp != null &&
+                oldApp.Status__c != app.Status__c &&
+                (app.Status__c == 'Accepted' ||
+                 app.Status__c == 'Rejected') &&
+                app.Student__c != null) {
+
+                studentIds.add(app.Student__c);
+            }
+        }
+
+        if (studentIds.isEmpty()) {
+            return;
+        }
+
+        // Query Students
+        Map<Id, Student__c> studentMap =
+            new Map<Id, Student__c>([
+                SELECT Id,
+                       Placement_Status__c,
+                       Selected_Company__c
+                FROM Student__c
+                WHERE Id IN :studentIds
+            ]);
+
+        List<Student__c> studentsToUpdate =
+            new List<Student__c>();
+
+        // Update Students
+        for (Application__c app : applications) {
+
+            Application__c oldApp = oldMap.get(app.Id);
+
+            if (oldApp != null &&
+                oldApp.Status__c != app.Status__c &&
+                (app.Status__c == 'Accepted' ||
+                 app.Status__c == 'Rejected') &&
+                app.Student__c != null) {
+
+                Student__c student =
+                    studentMap.get(app.Student__c);
+
+                if (student != null) {
+
+                    // Accepted → Selected
+                    if (app.Status__c == 'Accepted') {
+
+                        student.Placement_Status__c =
+                            'Selected';
+
+                        student.Selected_Company__c =
+                            app.Company__c;
+                    }
+
+                    // Rejected → Not Placed
+                    else if (app.Status__c == 'Rejected') {
+
+                        student.Placement_Status__c =
+                            'Not Placed';
+
+                        student.Selected_Company__c = null;
+                    }
+
+                    studentsToUpdate.add(student);
+                }
+            }
+        }
+
+        // Update all Students at once
+        if (!studentsToUpdate.isEmpty()) {
+            update studentsToUpdate;
+        }
+    }
+}
